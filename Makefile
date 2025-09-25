@@ -15,6 +15,7 @@ PANDOC = pandoc
 PUBLISH_DIR = publish
 SRC_DIR = src
 IMAGES_DIR = images
+GV_DIR = $(IMAGES_DIR)/src
 COMMON_DIR = common
 
 ############################
@@ -43,6 +44,9 @@ DOT_PDF_ROOT = $(DOT_ROOT:.gv=.pdf)
 DOT_PDF_TARGET = $(DOT_TARGET:.gv=.pdf)
 DOT_PDF = $(DOT_PDF_ROOT) $(DOT_PDF_TARGET)
 
+GV_FILES = $(wildcard $(GV_DIR)/*.gv)
+GV_OUT = $(patsubst $(GV_DIR)/%.gv,$(IMAGES_DIR)/%.pdf,$(GV_FILES))
+
 DOC     = $(wildcard $(SRC_DIR)/*.doc)
 DOC_PDF = $(DOC:.doc=.pdf)
 
@@ -50,13 +54,15 @@ DOC_PDF = $(DOC:.doc=.pdf)
 # Goals
 ############################
 
-.PHONY: all clean pdf
+.PHONY: all clean pdf images
 .DEFAULT_GOAL := all
 
 all: pdf
 
 publish: $(PDF_PUBLISH)
 pdf:  $(PDF)
+
+images : $(GV_OUT)
 
 clean: 
 	@echo "Cleaning up..."
@@ -95,13 +101,19 @@ $(DOT_PDF): %.pdf: %.gv
 $(DOC_PDF): %.pdf: %.doc
 	soffice --headless --convert-to pdf --outdir $(dir $@) $<
 
+$(GV_OUT): $(IMAGES_DIR)/%.pdf: $(GV_DIR)/%.gv
+	@echo $<
+	@echo $@
+	dot -Tpdf $< -o $@
+	@echo "Generated PDF: $@"
+
 ############################
 # Custom patterns
 ############################
 
 
 TARGET_IMAGE_DEPS = $(filter $(IMAGES_DIR)/$*/%,$(DOT_PDF_TARGET) $(SVG_PDF_TARGET) $(PNG_TARGET))
-ROOT_IMAGE_DEPS = $(filter $(IMAGES_DIR)/%,$(DOT_PDF_ROOT) $(SVG_PDF_ROOT) $(PNG_ROOT))
+ROOT_IMAGE_DEPS = $(filter $(IMAGES_DIR)/%,$(DOT_PDF_ROOT) $(SVG_PDF_ROOT) $(PNG_ROOT) $(GV_OUT))
 
 .SECONDEXPANSION:
 $(PDF): $(SRC_DIR)/%.pdf: $(ROOT_IMAGE_DEPS) $(COMMON_PNG_IMAGE_DEPS) $$(TARGET_IMAGE_DEPS) $(DOC_PDF)
@@ -115,5 +127,3 @@ $(PDF): PANDOC_ARGS = \
 	--citeproc \
 	--bibliography $(COMMON_DIR)/citations.bib \
   --csl $(COMMON_DIR)/gost/gost-r-7-0-5-2008-numeric.csl
-	  
-

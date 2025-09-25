@@ -1,0 +1,41 @@
+digraph CompilerPipeline {
+    rankdir=LR;
+    newrank=true;
+    node [shape=box];
+
+    subgraph cluster_backend {
+      style=invis
+
+      IR [label="Intermediate\n Representation (IR)"];
+      Optimizer [label="Optimization"];
+      CodeGen [label="Code Generation"];
+
+      IR -> Optimizer -> CodeGen;
+    }
+
+    subgraph cluster_frontend {
+        label="Frontend";
+        style=rounded;
+        color=lightgrey;
+        node [style=filled];
+
+        Lexer [label="Lexical Analysis"];
+        Parser [label="Parsing / Syntax Analysis"];
+        Semantic [label="Semantic Analysis"];
+
+
+        Lexer -> Parser -> Semantic;
+    }
+
+    SourceCode [label="Source Code"];
+    Executable [label="Binary"];
+
+    SourceCode -> Lexer;
+    CodeGen -> Executable;
+
+    Semantic:n -> IR[constraint=false];
+
+    {rank = same; IR Lexer} 
+}
+
+
