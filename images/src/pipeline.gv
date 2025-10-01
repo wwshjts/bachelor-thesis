@@ -1,41 +1,44 @@
 digraph CompilerPipeline {
+    fontname="Times New Roman"
+
     rankdir=LR;
     newrank=true;
     node [shape=box];
 
     subgraph cluster_backend {
-      style=invis
+      label="Backend"
+      color=lightgrey;
+      style=rounded;
 
-      IR [label="Intermediate\n Representation (IR)"];
-      Optimizer [label="Optimization"];
-      CodeGen [label="Code Generation"];
+      MLIR [label="Машинно-независимые \n оптимизации"];
+      LLIR [label="Машинно-ориентированные \n оптимизации"];
+      Codegen [label="Кодогенерация"];
 
-      IR -> Optimizer -> CodeGen;
+      MLIR -> LLIR -> Codegen;
     }
 
     subgraph cluster_frontend {
         label="Frontend";
-        style=rounded;
         color=lightgrey;
-        node [style=filled];
+        style=rounded;
 
-        Lexer [label="Lexical Analysis"];
-        Parser [label="Parsing / Syntax Analysis"];
-        Semantic [label="Semantic Analysis"];
+        Lexer [label="Лексический анализ"];
+        Parser [label="Синтаксический анализ"];
+        Semantic [label="Семантический анализ"];
 
 
         Lexer -> Parser -> Semantic;
     }
 
-    SourceCode [label="Source Code"];
-    Executable [label="Binary"];
+    SourceCode [label="Исходный код"];
+    Executable [label="Целевой язык"];
 
     SourceCode -> Lexer;
-    CodeGen -> Executable;
+    Codegen -> Executable;
 
-    Semantic:n -> IR[constraint=false];
+    Semantic:n -> MLIR[constraint=false];
 
-    {rank = same; IR Lexer} 
+    {rank = same; MLIR Lexer} 
 }
 
 
