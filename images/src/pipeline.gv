@@ -6,7 +6,7 @@ digraph CompilerPipeline {
     node [shape=box];
 
     subgraph cluster_backend {
-      label="Backend"
+      label="Оптимизатор"
       color=lightgrey;
       style=rounded;
 
